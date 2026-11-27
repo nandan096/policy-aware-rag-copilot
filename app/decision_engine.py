@@ -1,20 +1,29 @@
 from typing import Any
 
 
+def _condition_fact_key(condition_key: str) -> str:
+    """Maps condition schema keys to incident fact field names."""
+    return "parcel_value" if condition_key == "min_value" else condition_key
+
+
 def _check_clause_conditions(conditions: dict[str, Any], facts: dict[str, Any]) -> tuple[bool, bool]:
     """
     Checks whether incident facts satisfy a clause's conditions.
     Returns (is_relevant_candidate, is_fully_satisfied):
-      - is_relevant_candidate: True if no provided fact contradicts the condition.
-      - is_fully_satisfied: True if all required condition keys exist in facts and pass.
+    - is_relevant_candidate: True if issue_type matches (when provided) and no fact contradicts.
+    - is_fully_satisfied: True if all required condition keys exist in facts and pass.
     """
-    if not conditions:
-        return True, True
+    if not conditions or "issue_type" not in conditions:
+        return False, False
+
+    # If caller provided an issue_type and it doesn't match this clause, reject immediately
+    if facts.get("issue_type") is not None:
+        if str(facts["issue_type"]).strip().lower() != str(conditions["issue_type"]).strip().lower():
+            return False, False
 
     is_fully_satisfied = True
 
     for key, expected in conditions.items():
-        # Handle minimum numeric threshold (e.g., min_value: 15000)
         if key == "min_value":
             actual_val = facts.get("parcel_value")
             if actual_val is None:
@@ -22,8 +31,6 @@ def _check_clause_conditions(conditions: dict[str, Any], facts: dict[str, Any]) 
                 continue
             if float(actual_val) < float(expected):
                 return False, False
-
-        # Handle exact match conditions (e.g., issue_type, product_type, seal_intact)
         else:
             actual = facts.get(key)
             if actual is None:
@@ -38,6 +45,13 @@ def _check_clause_conditions(conditions: dict[str, Any], facts: dict[str, Any]) 
                     return False, False
 
     return True, is_fully_satisfied
+
+
+def _derive_required_fields(clause: dict[str, Any]) -> list[str]:
+    """Combines explicit rule required_fields with fields implied by clause conditions."""
+    rule_fields = list((clause.get("decision_rule") or {}).get("required_fields", []))
+    cond_fields = [_condition_fact_key(k) for k in (clause.get("conditions") or {}).keys()]
+    return list(dict.fromkeys(rule_fields + cond_fields))
 
 
 def _execute_decision_rule(decision_rule: dict[str, Any], facts: dict[str, Any]) -> str:
@@ -100,7 +114,7 @@ def evaluate_compliance(
     Deterministic Policy & Precedence Engine.
     Evaluates incident facts against retrieved temporal clauses.
     """
-    # Gate 1: Abstain if retrieval found nothing or semantic match is too weak
+    # Gate 1: Abstain if retrieval found nothing or best semantic match is too weak
     if not retrieved_clauses:
         return {
             "status": "ABSTAIN",
@@ -111,19 +125,19 @@ def evaluate_compliance(
             "reason": "No active SOP policies found for this incident date.",
         }
 
-    top_similarity = float(retrieved_clauses[0].get("semantic_similarity", 0.0))
-    if top_similarity < min_similarity_threshold:
+    max_similarity = max(float(c.get("semantic_similarity", 0.0)) for c in retrieved_clauses)
+    if max_similarity < min_similarity_threshold:
         return {
             "status": "ABSTAIN",
             "decision_code": "ABSTAIN_OUT_OF_SCOPE",
             "winning_clause": None,
             "overridden_clauses": [],
             "missing_fields": [],
-            "reason": f"Query falls outside documented SOP coverage (top similarity {top_similarity} < {min_similarity_threshold}).",
+            "reason": f"Query falls outside documented SOP coverage (max similarity {max_similarity} < {min_similarity_threshold}).",
         }
 
-    top_kw_score = max(float(c.get("kw_score", 0.0)) for c in retrieved_clauses)
-    if not incident_facts and top_kw_score == 0.0 and top_similarity < 0.72:
+    # When no structured facts are provided at all, require high semantic confidence
+    if not incident_facts and max_similarity < 0.76:
         return {
             "status": "ABSTAIN",
             "decision_code": "ABSTAIN_OUT_OF_SCOPE",
@@ -145,7 +159,6 @@ def evaluate_compliance(
         elif is_candidate and not is_satisfied:
             partial_candidates.append(clause)
 
-    # Sort candidates by priority descending (e.g., priority 100 OVERRIDE beats priority 10 GLOBAL)
     fully_matched.sort(key=lambda c: int(c.get("priority", 10)), reverse=True)
     partial_candidates.sort(key=lambda c: int(c.get("priority", 10)), reverse=True)
 
@@ -154,7 +167,7 @@ def evaluate_compliance(
 
     for candidate in partial_candidates:
         if int(candidate.get("priority", 10)) > highest_matched_priority:
-            req_fields = (candidate.get("decision_rule") or {}).get("required_fields", [])
+            req_fields = _derive_required_fields(candidate)
             missing = [f for f in req_fields if incident_facts.get(f) is None]
             if missing:
                 return {
@@ -176,14 +189,15 @@ def evaluate_compliance(
             "reason": "Retrieved clauses did not match the provided incident conditions.",
         }
 
-    # Gate 4: Resolve Precedence (highest priority wins; lower matching rules are marked overridden)
+    # Gate 4: Resolve Precedence (highest priority wins; detect equal-priority conflicts)
     winner = fully_matched[0]
     overridden = fully_matched[1:]
+    top_priority = int(winner.get("priority", 10))
 
     # Gate 5: Check required action fields on the winning rule
     winner_rule = winner.get("decision_rule") or {}
     missing_action_fields = [
-        f for f in winner_rule.get("required_fields", []) if incident_facts.get(f) is None
+        f for f in _derive_required_fields(winner) if incident_facts.get(f) is None
     ]
     if missing_action_fields:
         return {
@@ -196,6 +210,27 @@ def evaluate_compliance(
         }
 
     decision_code = _execute_decision_rule(winner_rule, incident_facts)
+
+    # Check if another matched clause shares the exact top priority but produces a conflicting decision
+    for peer in overridden:
+        if int(peer.get("priority", 10)) == top_priority:
+            peer_rule = peer.get("decision_rule") or {}
+            peer_missing = [f for f in _derive_required_fields(peer) if incident_facts.get(f) is None]
+            if not peer_missing:
+                peer_code = _execute_decision_rule(peer_rule, incident_facts)
+                if peer_code != decision_code:
+                    return {
+                        "status": "NEEDS_REVIEW",
+                        "decision_code": "CONFLICTING_EQUAL_PRIORITY_RULES",
+                        "winning_clause": winner,
+                        "overridden_clauses": overridden,
+                        "missing_fields": [],
+                        "reason": (
+                            f"Equal-priority conflict (priority={top_priority}) between "
+                            f"{winner['rule_clause_id']} ({decision_code}) and "
+                            f"{peer['rule_clause_id']} ({peer_code})."
+                        ),
+                    }
 
     return {
         "status": "DECIDED",

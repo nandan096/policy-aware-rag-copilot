@@ -1,6 +1,13 @@
+import re
 from datetime import date
 from app.db import get_db_cursor
 from app.llm_client import get_embedding
+
+
+def _build_keyword_query(query_text: str) -> str:
+    """Extracts 3+ letter words joined by OR so websearch_to_tsquery ranks partial term overlap."""
+    tokens = list(dict.fromkeys(re.findall(r"[A-Za-z]{3,}", query_text.lower())))
+    return " OR ".join(tokens) if tokens else query_text
 
 
 def retrieve_applicable_clauses(
@@ -17,8 +24,9 @@ def retrieve_applicable_clauses(
     """
     query_vec = get_embedding(query_text, task_type="RETRIEVAL_QUERY")
     vec_str = "[" + ",".join(str(x) for x in query_vec) + "]"
+    kw_query = _build_keyword_query(query_text)
 
-    # Toggle date filter off ONLY when benchmarking naive baseline RAG in evals
+    # Toggle date filter off ONLY when benchmarking ablation baseline in evals
     date_filter_sql = "" if ignore_dates else """
         AND rv.valid_from <= %(incident_date)s
         AND (rv.valid_to IS NULL OR rv.valid_to >= %(incident_date)s)
@@ -41,7 +49,7 @@ def retrieve_applicable_clauses(
             rv.conditions,
             rv.decision_rule,
             rv.embedding <=> %(query_vec)s::vector AS cosine_distance,
-            ts_rank_cd(rv.tsv, plainto_tsquery('english', %(query_text)s)) AS kw_score
+            ts_rank_cd(rv.tsv, websearch_to_tsquery('english', %(kw_query)s)) AS kw_score
         FROM rule_versions rv
         JOIN sop_documents sd ON rv.sop_id = sd.id
         WHERE 1=1
@@ -81,7 +89,7 @@ def retrieve_applicable_clauses(
             sql,
             {
                 "query_vec": vec_str,
-                "query_text": query_text,
+                "kw_query": kw_query,
                 "incident_date": incident_date,
                 "top_k": top_k,
             },

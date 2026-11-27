@@ -639,5 +639,150 @@
     "expected_status": "ABSTAIN",
     "expected_decision": "ABSTAIN_OUT_OF_SCOPE",
     "expected_clause": null
+  },
+
+  {
+    "id": "TC-51",
+    "category": "override",
+    "incident_date": "2026-08-10",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "electronics",
+      "parcel_value": 19500,
+      "attempts_completed": 1
+    },
+    "free_text": "Standard NDR doorstep unavailable: rider logged IVR call and waited 10 minutes within 72 hours reattempt window",
+    "expected_status": "DECIDED",
+    "expected_decision": "HOLD_AT_SECURE_CAGE_AND_RTO",
+    "expected_clause": "SOP-VIP-002-C1"
+  },
+  {
+    "id": "TC-52",
+    "category": "override",
+    "incident_date": "2026-08-10",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "electronics",
+      "parcel_value": 32000,
+      "attempts_completed": 1
+    },
+    "free_text": "Doorstep NDR reattempt policy query after IVR call and 10 minute wait for 72 hour reattempt limit",
+    "expected_status": "DECIDED",
+    "expected_decision": "HOLD_AT_SECURE_CAGE_AND_RTO",
+    "expected_clause": "SOP-VIP-002-C1"
+  },
+  {
+    "id": "TC-53",
+    "category": "override",
+    "incident_date": "2026-07-22",
+    "facts": {
+      "issue_type": "damaged_parcel",
+      "seal_intact": true,
+      "supervisor_approved": true
+    },
+    "free_text": "Outer security tape crushed before handover, rider asked whether to take 3 timestamped photos and mark Damaged in Transit for hub QC desk",
+    "expected_status": "DECIDED",
+    "expected_decision": "AUTHORIZE_DOORSTEP_OPEN_BOX_INSPECTION",
+    "expected_clause": "SOP-HUB-005-C1"
+  },
+  {
+    "id": "TC-54",
+    "category": "override",
+    "incident_date": "2026-07-22",
+    "facts": {
+      "issue_type": "damaged_parcel",
+      "seal_intact": true,
+      "supervisor_approved": true
+    },
+    "free_text": "Damaged in Transit return to hub QC desk with 3 timestamped photos requested, though internal seal is intact and supervisor approved",
+    "expected_status": "DECIDED",
+    "expected_decision": "AUTHORIZE_DOORSTEP_OPEN_BOX_INSPECTION",
+    "expected_clause": "SOP-HUB-005-C1"
+  },
+  {
+    "id": "TC-55",
+    "category": "override",
+    "incident_date": "2026-08-10",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "electronics",
+      "parcel_value": 15000,
+      "attempts_completed": 2
+    },
+    "free_text": "Customer unavailable at doorstep after IVR call and 10 minutes wait under standard 3 reattempts 72 hours NDR rule",
+    "expected_status": "DECIDED",
+    "expected_decision": "HOLD_AT_SECURE_CAGE_AND_RTO",
+    "expected_clause": "SOP-VIP-002-C1"
+  },
+
+  {
+    "id": "TC-56",
+    "category": "abstention",
+    "incident_date": "2026-08-10",
+    "facts": {
+      "issue_type": "open_box_delivery",
+      "product_type": "apparel",
+      "parcel_value": 3500,
+      "otp_shared": false
+    },
+    "free_text": "Customer wants open-box delivery inspection for a cotton shirt before sharing OTP",
+    "expected_status": "ABSTAIN",
+    "expected_decision": "ABSTAIN_NO_CONDITION_MATCH",
+    "expected_clause": null
+  },
+  {
+    "id": "TC-57",
+    "category": "abstention",
+    "incident_date": "2026-08-10",
+    "facts": {
+      "issue_type": "customs_clearance",
+      "product_type": "electronics",
+      "parcel_value": 42000
+    },
+    "free_text": "International cross-border shipment held at airport customs awaiting KYC duty payment",
+    "expected_status": "ABSTAIN",
+    "expected_decision": "ABSTAIN_NO_CONDITION_MATCH",
+    "expected_clause": null
+  },
+  {
+    "id": "TC-58",
+    "category": "abstention",
+    "incident_date": "2026-08-10",
+    "facts": {
+      "issue_type": "hazardous_spill",
+      "product_type": "general",
+      "parcel_value": 1800
+    },
+    "free_text": "Lithium battery chemical leakage detected inside delivery van during transit",
+    "expected_status": "ABSTAIN",
+    "expected_decision": "ABSTAIN_NO_CONDITION_MATCH",
+    "expected_clause": null
+  },
+  {
+    "id": "TC-59",
+    "category": "abstention",
+    "incident_date": "2026-08-10",
+    "facts": {
+      "issue_type": "perishable_cold_chain",
+      "product_type": "general",
+      "parcel_value": 2400
+    },
+    "free_text": "Refrigerated dairy shipment exceeded 8 degrees Celsius cold-chain threshold",
+    "expected_status": "ABSTAIN",
+    "expected_decision": "ABSTAIN_NO_CONDITION_MATCH",
+    "expected_clause": null
+  },
+  {
+    "id": "TC-60",
+    "category": "abstention",
+    "incident_date": "2026-08-10",
+    "facts": {
+      "issue_type": "vehicle_breakdown",
+      "distance_km": 6.5
+    },
+    "free_text": "Delivery van axle broke down 6.5 km from hub; rider requesting tow truck dispatch",
+    "expected_status": "ABSTAIN",
+    "expected_decision": "ABSTAIN_NO_CONDITION_MATCH",
+    "expected_clause": null
   }
 ]

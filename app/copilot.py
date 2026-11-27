@@ -1,3 +1,4 @@
+import logging
 import time
 from datetime import date
 from typing import Any
@@ -6,6 +7,8 @@ from app.db import get_db_cursor
 from app.retrieval import retrieve_applicable_clauses
 from app.decision_engine import evaluate_compliance
 from app.llm_client import generate_json
+
+logger = logging.getLogger(__name__)
 
 
 def _build_search_query(free_text: str, incident_facts: dict[str, Any]) -> str:
@@ -118,11 +121,17 @@ def evaluate_incident(
     # 2. Deterministic Python Rule & Precedence Evaluation
     decision = evaluate_compliance(retrieved, facts)
 
-    # 3. Grounded Explanation (only call LLM when a valid rule decision was reached)
+    # 3. Grounded Explanation with deterministic fallback if LLM provider fails
     if decision["status"] == "DECIDED":
-        grounded = _generate_grounded_explanation(search_query, incident_date, facts, decision)
-        explanation = grounded["explanation"]
-        cited_clauses = grounded["cited_clause_ids"]
+        winner = decision["winning_clause"]
+        try:
+            grounded = _generate_grounded_explanation(search_query, incident_date, facts, decision)
+            explanation = grounded["explanation"]
+            cited_clauses = grounded["cited_clause_ids"]
+        except Exception as exc:
+            logger.warning("LLM explanation failed; falling back to rule reason: %s", exc)
+            explanation = f"{decision['reason']} Policy clause: {winner['content']}"
+            cited_clauses = [winner["rule_clause_id"]]
     elif decision["status"] == "NEEDS_CLARIFICATION":
         missing_str = ", ".join(decision["missing_fields"])
         explanation = f"Additional incident details needed before making a compliance decision: please provide {missing_str}."
@@ -145,15 +154,18 @@ def evaluate_incident(
         "latency_ms": latency_ms,
     }
 
-    # 4. Audit log to Neon tickets table
+    # 4. Best-effort audit log to Neon tickets table (never discard a valid decision on log failure)
     if log_to_db:
-        with get_db_cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO tickets (ticket_date, query_text, decision_json, latency_ms)
-                VALUES (%s, %s, %s, %s);
-                """,
-                (incident_date, search_query, Jsonb(response_payload), latency_ms),
-            )
+        try:
+            with get_db_cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO tickets (ticket_date, query_text, decision_json, latency_ms)
+                    VALUES (%s, %s, %s, %s);
+                    """,
+                    (incident_date, search_query, Jsonb(response_payload), latency_ms),
+                )
+        except Exception as exc:
+            logger.warning("Failed to persist audit ticket to Neon: %s", exc)
 
     return response_payload

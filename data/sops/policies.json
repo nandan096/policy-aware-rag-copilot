@@ -18,7 +18,7 @@
           "action_if_under_limit": "REATTEMPT_DELIVERY",
           "action_if_limit_reached": "MARK_RTO"
         },
-        "content": "When a customer is unavailable at the doorstep, the delivery executive must call the customer twice and wait 5 minutes. Maximum 2 delivery reattempts are allowed before marking the shipment RTO (Return to Origin).",
+        "content": "When a customer is unavailable at the doorstep, the delivery executive must call the customer twice and wait 5 minutes. A maximum of 2 failed delivery attempts (including the initial attempt) are permitted before marking the shipment RTO (Return to Origin).",
         "valid_from": "2026-01-01",
         "valid_to": "2026-05-31"
       },
@@ -36,7 +36,7 @@
           "action_if_under_limit": "REATTEMPT_DELIVERY",
           "action_if_limit_reached": "MARK_RTO"
         },
-        "content": "When a customer is unavailable at the doorstep, the delivery executive must log an IVR call and wait 10 minutes. Maximum 3 delivery reattempts are allowed within 72 hours before marking the shipment RTO (Return to Origin).",
+        "content": "When a customer is unavailable at the doorstep, the delivery executive must log an IVR call and wait 10 minutes. A maximum of 3 failed delivery attempts (including the initial attempt) are permitted within 72 hours before marking the shipment RTO (Return to Origin).",
         "valid_from": "2026-06-01",
         "valid_to": null
       },
@@ -85,7 +85,7 @@
           "action_if_under_limit": "REATTEMPT_DELIVERY",
           "action_if_limit_reached": "HOLD_AT_SECURE_CAGE_AND_RTO"
         },
-        "content": "For high-value electronics shipments above INR 15,000, only 1 delivery reattempt is permitted due to theft risk. After the second failed attempt, hold at the secure hub cage and initiate immediate RTO.",
+        "content": "For high-value electronics shipments valued at INR 15,000 or above, zero reattempts are permitted after the initial failed delivery due to theft risk. Once 1 failed attempt is recorded, hold at the secure hub cage and initiate immediate RTO.",
         "valid_from": "2026-01-01",
         "valid_to": null
       }
@@ -110,7 +110,7 @@
           "action_if_under_limit": "ACCEPT_CASH_OR_UPI",
           "action_if_over_limit": "REQUIRE_UPI_QR_ONLY"
         },
-        "content": "Maximum cash collection per COD shipment is INR 10,000. Any order above INR 10,000 must be paid strictly via UPI QR scan at the doorstep.",
+        "content": "Maximum cash collection per COD shipment is INR 10,000 (inclusive). Any COD order strictly above INR 10,000 must be paid via UPI QR scan at the doorstep.",
         "valid_from": "2026-01-01",
         "valid_to": "2026-07-14"
       },
@@ -128,7 +128,7 @@
           "action_if_under_limit": "ACCEPT_CASH_OR_UPI",
           "action_if_over_limit": "REQUIRE_DYNAMIC_UPI_QR_ONLY"
         },
-        "content": "Maximum cash collection per COD shipment is INR 5,000. Any COD order above INR 5,000 must be paid via dynamic UPI QR link; physical cash above INR 5,000 is strictly prohibited.",
+        "content": "Maximum cash collection per COD shipment is INR 5,000 (inclusive). Any COD order strictly above INR 5,000 must be paid via dynamic UPI QR link; physical cash above INR 5,000 is strictly prohibited.",
         "valid_from": "2026-07-15",
         "valid_to": null
       }
@@ -152,7 +152,7 @@
           "action_if_broken": "DO_NOT_HANDOVER_PHOTO_AND_HUB_QC",
           "photos_required": 3
         },
-        "content": "If the outer security tape is broken or box is crushed before handover, do not hand over the parcel. Take 3 timestamped photos in the rider app, mark status as 'Damaged in Transit', and return to hub QC desk.",
+        "content": "If the outer security tape is broken or box is crushed before handover and internal seal is compromised, do not hand over the parcel. Take 3 timestamped photos in the rider app, mark status as 'Damaged in Transit', and return to hub QC desk.",
         "valid_from": "2026-01-01",
         "valid_to": null
       },
@@ -170,7 +170,7 @@
           "action_before_otp": "INSPECT_BEFORE_OTP",
           "action_after_otp": "REJECT_DOORSTEP_RETURN"
         },
-        "content": "Open-box delivery (OBD) is mandatory for smartphones and laptops. The customer must inspect the item before sharing the 4-digit delivery OTP. Once OTP is verified, doorstep return claims are not accepted by the rider.",
+        "content": "Open-box delivery (OBD) is mandatory for electronics such as smartphones and laptops. The customer must inspect the item before sharing the 4-digit delivery OTP. Once OTP is verified, doorstep return claims are not accepted by the rider.",
         "valid_from": "2026-01-01",
         "valid_to": null
       }
@@ -220,7 +220,7 @@
           "action_if_within_limit": "DELIVER_WITH_GPS_CAPTURE",
           "action_if_beyond_limit": "MARK_ADDRESS_MISROUTE_HUB_TRANSFER"
         },
-        "content": "If the customer's new address is within 2 km of the original pin code, the rider may deliver after capturing live GPS coordinates. If beyond 2 km or in a different hub zone, mark 'Address Misroute' for hub transfer.",
+        "content": "If the customer's new address is within 2 km (inclusive) of the original pin code, the rider may deliver after capturing live GPS coordinates. If beyond 2 km or in a different hub zone, mark 'Address Misroute' for hub transfer.",
         "valid_from": "2026-01-01",
         "valid_to": null
       }

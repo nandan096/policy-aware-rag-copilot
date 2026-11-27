@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS rule_versions (
     conditions JSONB NOT NULL DEFAULT '{}'::jsonb,
     decision_rule JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE (sop_id, version_num, rule_clause_id)
+    UNIQUE (sop_id, version_num, rule_clause_id),
+    CHECK (valid_to IS NULL OR valid_to >= valid_from)
 );
 
 -- Indexes for Temporal Hybrid Search & JSONB Condition Filtering

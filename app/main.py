@@ -1,19 +1,24 @@
+import logging
 from contextlib import asynccontextmanager
 from datetime import date
 from typing import Any
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from app.db import init_pool, close_pool, get_db_cursor
 from app.copilot import evaluate_incident
-from fastapi.responses import FileResponse
+
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_pool()
     yield
     close_pool()
+
 
 app = FastAPI(
     title="Policy-Aware Logistics Compliance Copilot",
@@ -30,22 +35,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 class IncidentRequest(BaseModel):
     incident_date: date = Field(..., description="Date of the delivery incident (YYYY-MM-DD)")
-    free_text: str = Field(default="", description="Optional incident notes from rider/supervisor")
+    free_text: str = Field(default="", max_length=500, description="Optional incident notes from rider/supervisor")
     issue_type: str | None = Field(default=None, description="e.g., customer_unavailable, cod_payment, damaged_parcel, open_box_delivery, address_change, reschedule_request")
     product_type: str | None = Field(default=None, description="e.g., electronics, apparel, general")
     parcel_value: float | None = Field(default=None, ge=0, description="Parcel value in INR")
-    attempts_completed: int | None = Field(default=None, ge=0, description="Number of delivery attempts already completed")
+    attempts_completed: int | None = Field(default=None, ge=0, description="Total failed delivery attempts completed so far (including initial delivery)")
     distance_km: float | None = Field(default=None, ge=0, description="Distance from original pin code in km")
     seal_intact: bool | None = Field(default=None, description="Whether inner security seal is intact")
     supervisor_approved: bool | None = Field(default=None, description="Whether hub supervisor approved exception")
     otp_verified: bool | None = Field(default=None, description="Whether customer verified reschedule via OTP")
     otp_shared: bool | None = Field(default=None, description="Whether customer already shared delivery OTP")
 
+
 @app.get("/", include_in_schema=False)
 def serve_ui() -> FileResponse:
     return FileResponse("static/index.html")
+
 
 @app.get("/api/health")
 def health_check() -> dict[str, str]:
@@ -53,6 +61,7 @@ def health_check() -> dict[str, str]:
         cur.execute("SELECT 1 AS ok;")
         cur.fetchone()
     return {"status": "healthy", "database": "connected"}
+
 
 @app.post("/api/evaluate")
 def evaluate_ticket(req: IncidentRequest) -> dict[str, Any]:
@@ -65,7 +74,12 @@ def evaluate_ticket(req: IncidentRequest) -> dict[str, Any]:
             log_to_db=True,
         )
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        logger.exception("Incident evaluation failed")
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error while evaluating incident.",
+        ) from exc
+
 
 @app.get("/api/policies")
 def list_policies() -> list[dict[str, Any]]:
@@ -96,8 +110,9 @@ def list_policies() -> list[dict[str, Any]]:
             r["valid_to"] = str(r["valid_to"]) if r["valid_to"] else "ACTIVE"
         return list(rows)
 
+
 @app.get("/api/tickets")
-def recent_tickets(limit: int = 15) -> list[dict[str, Any]]:
+def recent_tickets(limit: int = Query(default=15, ge=1, le=100)) -> list[dict[str, Any]]:
     with get_db_cursor() as cur:
         cur.execute(
             """
