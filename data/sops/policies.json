@@ -1,0 +1,229 @@
+[
+  {
+    "sop_code": "SOP-DEL-001",
+    "title": "Standard Last-Mile Reattempt & NDR Policy",
+    "category": "Customer Unavailable",
+    "rules": [
+      {
+        "version_num": 1,
+        "rule_clause_id": "SOP-DEL-001-C1-V1",
+        "scope": "GLOBAL",
+        "priority": 10,
+        "conditions": {
+          "issue_type": "customer_unavailable"
+        },
+        "required_fields": ["attempts_completed"],
+        "decision_rule": {
+          "max_attempts": 2,
+          "action_if_under_limit": "REATTEMPT_DELIVERY",
+          "action_if_limit_reached": "MARK_RTO"
+        },
+        "content": "When a customer is unavailable at the doorstep, the delivery executive must call the customer twice and wait 5 minutes. Maximum 2 delivery reattempts are allowed before marking the shipment RTO (Return to Origin).",
+        "valid_from": "2026-01-01",
+        "valid_to": "2026-05-31"
+      },
+      {
+        "version_num": 2,
+        "rule_clause_id": "SOP-DEL-001-C1-V2",
+        "scope": "GLOBAL",
+        "priority": 10,
+        "conditions": {
+          "issue_type": "customer_unavailable"
+        },
+        "required_fields": ["attempts_completed"],
+        "decision_rule": {
+          "max_attempts": 3,
+          "action_if_under_limit": "REATTEMPT_DELIVERY",
+          "action_if_limit_reached": "MARK_RTO"
+        },
+        "content": "When a customer is unavailable at the doorstep, the delivery executive must log an IVR call and wait 10 minutes. Maximum 3 delivery reattempts are allowed within 72 hours before marking the shipment RTO (Return to Origin).",
+        "valid_from": "2026-06-01",
+        "valid_to": null
+      },
+      {
+        "version_num": 1,
+        "rule_clause_id": "SOP-DEL-001-C2",
+        "scope": "GLOBAL",
+        "priority": 10,
+        "conditions": {
+          "issue_type": "reschedule_request"
+        },
+        "required_fields": ["otp_verified"],
+        "decision_rule": {
+          "require_otp": true,
+          "action_if_valid": "CONFIRM_RESCHEDULE_SLOT",
+          "action_if_invalid": "REJECT_VERBAL_RESCHEDULE"
+        },
+        "content": "If a customer requests rescheduling via phone call, the executive must capture an OTP-verified reschedule slot in the rider app; verbal reschedules without OTP are invalid.",
+        "valid_from": "2026-01-01",
+        "valid_to": null
+      }
+    ]
+  },
+  {
+    "sop_code": "SOP-VIP-002",
+    "title": "High-Value Electronics Client Override SOP",
+    "category": "Customer Unavailable",
+    "rules": [
+      {
+        "version_num": 1,
+        "rule_clause_id": "SOP-VIP-002-C1",
+        "scope": "OVERRIDE",
+        "priority": 100,
+        "conditions": {
+          "issue_type": "customer_unavailable",
+          "product_type": "electronics",
+          "min_value": 15000
+        },
+        "required_fields": [
+          "product_type",
+          "parcel_value",
+          "attempts_completed"
+        ],
+        "decision_rule": {
+          "max_attempts": 1,
+          "action_if_under_limit": "REATTEMPT_DELIVERY",
+          "action_if_limit_reached": "HOLD_AT_SECURE_CAGE_AND_RTO"
+        },
+        "content": "For high-value electronics shipments above INR 15,000, only 1 delivery reattempt is permitted due to theft risk. After the second failed attempt, hold at the secure hub cage and initiate immediate RTO.",
+        "valid_from": "2026-01-01",
+        "valid_to": null
+      }
+    ]
+  },
+  {
+    "sop_code": "SOP-COD-003",
+    "title": "Cash on Delivery (COD) Collection & Limit Policy",
+    "category": "Payment & COD",
+    "rules": [
+      {
+        "version_num": 1,
+        "rule_clause_id": "SOP-COD-003-C1-V1",
+        "scope": "GLOBAL",
+        "priority": 10,
+        "conditions": {
+          "issue_type": "cod_payment"
+        },
+        "required_fields": ["parcel_value"],
+        "decision_rule": {
+          "max_cash_inr": 10000,
+          "action_if_under_limit": "ACCEPT_CASH_OR_UPI",
+          "action_if_over_limit": "REQUIRE_UPI_QR_ONLY"
+        },
+        "content": "Maximum cash collection per COD shipment is INR 10,000. Any order above INR 10,000 must be paid strictly via UPI QR scan at the doorstep.",
+        "valid_from": "2026-01-01",
+        "valid_to": "2026-07-14"
+      },
+      {
+        "version_num": 2,
+        "rule_clause_id": "SOP-COD-003-C1-V2",
+        "scope": "GLOBAL",
+        "priority": 10,
+        "conditions": {
+          "issue_type": "cod_payment"
+        },
+        "required_fields": ["parcel_value"],
+        "decision_rule": {
+          "max_cash_inr": 5000,
+          "action_if_under_limit": "ACCEPT_CASH_OR_UPI",
+          "action_if_over_limit": "REQUIRE_DYNAMIC_UPI_QR_ONLY"
+        },
+        "content": "Maximum cash collection per COD shipment is INR 5,000. Any COD order above INR 5,000 must be paid via dynamic UPI QR link; physical cash above INR 5,000 is strictly prohibited.",
+        "valid_from": "2026-07-15",
+        "valid_to": null
+      }
+    ]
+  },
+  {
+    "sop_code": "SOP-DMG-004",
+    "title": "Damaged or Tampered Package Handling SOP",
+    "category": "Damaged Parcel",
+    "rules": [
+      {
+        "version_num": 1,
+        "rule_clause_id": "SOP-DMG-004-C1",
+        "scope": "GLOBAL",
+        "priority": 10,
+        "conditions": {
+          "issue_type": "damaged_parcel"
+        },
+        "required_fields": ["seal_intact"],
+        "decision_rule": {
+          "action_if_broken": "DO_NOT_HANDOVER_PHOTO_AND_HUB_QC",
+          "photos_required": 3
+        },
+        "content": "If the outer security tape is broken or box is crushed before handover, do not hand over the parcel. Take 3 timestamped photos in the rider app, mark status as 'Damaged in Transit', and return to hub QC desk.",
+        "valid_from": "2026-01-01",
+        "valid_to": null
+      },
+      {
+        "version_num": 1,
+        "rule_clause_id": "SOP-DMG-004-C2",
+        "scope": "GLOBAL",
+        "priority": 20,
+        "conditions": {
+          "issue_type": "open_box_delivery",
+          "product_type": "electronics"
+        },
+        "required_fields": ["otp_shared"],
+        "decision_rule": {
+          "action_before_otp": "INSPECT_BEFORE_OTP",
+          "action_after_otp": "REJECT_DOORSTEP_RETURN"
+        },
+        "content": "Open-box delivery (OBD) is mandatory for smartphones and laptops. The customer must inspect the item before sharing the 4-digit delivery OTP. Once OTP is verified, doorstep return claims are not accepted by the rider.",
+        "valid_from": "2026-01-01",
+        "valid_to": null
+      }
+    ]
+  },
+  {
+    "sop_code": "SOP-HUB-005",
+    "title": "Hub Manager Emergency Reattempt Directive",
+    "category": "Damaged Parcel",
+    "rules": [
+      {
+        "version_num": 1,
+        "rule_clause_id": "SOP-HUB-005-C1",
+        "scope": "OVERRIDE",
+        "priority": 100,
+        "conditions": {
+          "issue_type": "damaged_parcel",
+          "seal_intact": true,
+          "supervisor_approved": true
+        },
+        "required_fields": ["seal_intact", "supervisor_approved"],
+        "decision_rule": {
+          "action": "AUTHORIZE_DOORSTEP_OPEN_BOX_INSPECTION"
+        },
+        "content": "For dented outer packaging where internal product seal is intact, hub supervisors may authorize one doorstep open-box inspection with customer consent instead of immediate Damaged in Transit return.",
+        "valid_from": "2026-03-01",
+        "valid_to": null
+      }
+    ]
+  },
+  {
+    "sop_code": "SOP-ADR-006",
+    "title": "Wrong Address & Pin-Code Mismatch SOP",
+    "category": "Address Issue",
+    "rules": [
+      {
+        "version_num": 1,
+        "rule_clause_id": "SOP-ADR-006-C1",
+        "scope": "GLOBAL",
+        "priority": 10,
+        "conditions": {
+          "issue_type": "address_change"
+        },
+        "required_fields": ["distance_km"],
+        "decision_rule": {
+          "max_distance_km": 2.0,
+          "action_if_within_limit": "DELIVER_WITH_GPS_CAPTURE",
+          "action_if_beyond_limit": "MARK_ADDRESS_MISROUTE_HUB_TRANSFER"
+        },
+        "content": "If the customer's new address is within 2 km of the original pin code, the rider may deliver after capturing live GPS coordinates. If beyond 2 km or in a different hub zone, mark 'Address Misroute' for hub transfer.",
+        "valid_from": "2026-01-01",
+        "valid_to": null
+      }
+    ]
+  }
+]

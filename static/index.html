@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Policy-Aware Logistics Compliance Copilot</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Policy-Aware Logistics Compliance Copilot</h1>
+        <span
+          >Temporal Hybrid Retrieval (pgvector + TSVector) &bull; Deterministic
+          Rule & Precedence Engine</span
+        >
+      </div>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('evaluator', this)">
+          Incident Evaluator
+        </button>
+        <button class="tab-btn" onclick="switchTab('policies', this)">
+          Policy Version Registry
+        </button>
+        <button class="tab-btn" onclick="switchTab('audit', this)">
+          Recent Audit Log
+        </button>
+      </div>
+    </header>
+
+    <div class="container">
+      <!-- TAB 1: EVALUATOR -->
+      <div id="tab-evaluator" class="grid">
+        <div class="panel">
+          <h2>1. Incident Ticket Input</h2>
+          <div class="section-title">Quick Test Scenarios</div>
+          <div class="presets">
+            <button
+              type="button"
+              class="preset-btn"
+              onclick="loadPreset('vip_override')"
+            >
+              VIP Electronics Override
+            </button>
+            <button
+              type="button"
+              class="preset-btn"
+              onclick="loadPreset('may_vs_aug')"
+            >
+              May 2026 Historical SOP
+            </button>
+            <button
+              type="button"
+              class="preset-btn"
+              onclick="loadPreset('cod_limit')"
+            >
+              COD Limit (Jul 2026)
+            </button>
+            <button
+              type="button"
+              class="preset-btn"
+              onclick="loadPreset('missing_info')"
+            >
+              Missing Parcel Value
+            </button>
+            <button
+              type="button"
+              class="preset-btn"
+              onclick="loadPreset('abstain')"
+            >
+              Out-of-Scope Query
+            </button>
+          </div>
+
+          <form id="eval-form" onsubmit="submitEvaluation(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="incident_date">Incident Date *</label>
+                <input
+                  type="date"
+                  id="incident_date"
+                  value="2026-08-10"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="issue_type">Issue Type</label>
+                <select id="issue_type">
+                  <option value="">-- Select / Leave Blank --</option>
+                  <option value="customer_unavailable">
+                    customer_unavailable
+                  </option>
+                  <option value="cod_payment">cod_payment</option>
+                  <option value="damaged_parcel">damaged_parcel</option>
+                  <option value="open_box_delivery">open_box_delivery</option>
+                  <option value="address_change">address_change</option>
+                  <option value="reschedule_request">reschedule_request</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="product_type">Product Category</label>
+                <select id="product_type">
+                  <option value="">-- Optional --</option>
+                  <option value="electronics">electronics</option>
+                  <option value="apparel">apparel</option>
+                  <option value="general">general</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="parcel_value">Parcel Value (INR)</label>
+                <input
+                  type="number"
+                  id="parcel_value"
+                  min="0"
+                  step="1"
+                  placeholder="e.g. 20000"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="attempts_completed">Attempts Completed</label>
+                <input
+                  type="number"
+                  id="attempts_completed"
+                  min="0"
+                  step="1"
+                  placeholder="e.g. 1"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="distance_km">Address Shift (km)</label>
+                <input
+                  type="number"
+                  id="distance_km"
+                  min="0"
+                  step="0.1"
+                  placeholder="e.g. 1.5"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="seal_intact">Inner Seal Intact?</label>
+                <select id="seal_intact">
+                  <option value="">-- N/A --</option>
+                  <option value="true">Yes (true)</option>
+                  <option value="false">No (false)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="supervisor_approved">Supervisor Approved?</label>
+                <select id="supervisor_approved">
+                  <option value="">-- N/A --</option>
+                  <option value="true">Yes (true)</option>
+                  <option value="false">No (false)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="otp_verified">Reschedule OTP Verified?</label>
+                <select id="otp_verified">
+                  <option value="">-- N/A --</option>
+                  <option value="true">Yes (true)</option>
+                  <option value="false">No (false)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="otp_shared">Delivery OTP Already Shared?</label>
+                <select id="otp_shared">
+                  <option value="">-- N/A --</option>
+                  <option value="true">Yes (true)</option>
+                  <option value="false">No (false)</option>
+                </select>
+              </div>
+
+              <div class="form-group full">
+                <label for="free_text">Free-Text Incident Notes</label>
+                <textarea
+                  id="free_text"
+                  rows="3"
+                  placeholder="Optional rider or supervisor notes..."
+                ></textarea>
+              </div>
+            </div>
+
+            <button type="submit" id="submit-btn" class="submit-btn">
+              Evaluate Compliance Decision
+            </button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <h2>2. Deterministic Audit Output</h2>
+          <div
+            id="result-placeholder"
+            class="result-placeholder"
+          >
+            Submit an incident ticket or click a test scenario on the left to
+            inspect temporal retrieval, rule precedence, and grounded citations.
+          </div>
+
+          <div id="result-box" class="hidden">
+            <div class="status-bar">
+              <div>
+                <div class="decision-label">
+                  LOCKED DECISION CODE
+                </div>
+                <div class="decision-code" id="res-code"></div>
+              </div>
+              <div class="text-right">
+                <span class="badge" id="res-status"></span>
+                <div
+                  class="latency-label"
+                  id="res-latency"
+                ></div>
+              </div>
+            </div>
+
+            <div class="section-block">
+              <div class="section-title">Operational Instruction</div>
+              <div id="res-explanation" class="instruction-text"></div>
+            </div>
+
+            <div class="section-block" id="missing-block">
+              <div class="section-title">Missing Required Fields</div>
+              <div class="mono" id="res-missing"></div>
+            </div>
+
+            <div class="section-block" id="winner-block">
+              <div class="section-title">Winning Policy Clause</div>
+              <div id="res-winner"></div>
+            </div>
+
+            <div class="section-block" id="override-block">
+              <div class="section-title">Overridden Lower-Priority Clauses</div>
+              <div id="res-overridden"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: POLICY REGISTRY -->
+      <div id="tab-policies" class="panel hidden">
+        <h2>SOP Version History & Clause Conditions (PostgreSQL)</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Clause ID</th>
+              <th>SOP Title</th>
+              <th>Scope / Priority</th>
+              <th>Effective Window</th>
+              <th>Conditions & Rule</th>
+              <th>Policy Text</th>
+            </tr>
+          </thead>
+          <tbody id="policies-tbody">
+            <tr>
+              <td colspan="6">Loading policies...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TAB 3: AUDIT LOG -->
+      <div id="tab-audit" class="panel hidden">
+        <h2>Recent Ticket Evaluations (Audit Trail)</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Incident Date</th>
+              <th>Query</th>
+              <th>Status & Decision</th>
+              <th>Latency</th>
+            </tr>
+          </thead>
+          <tbody id="audit-tbody">
+            <tr>
+              <td colspan="5">Loading audit trail...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      const PRESETS = {
+        vip_override: {
+          incident_date: "2026-08-10",
+          issue_type: "customer_unavailable",
+          product_type: "electronics",
+          parcel_value: 20000,
+          attempts_completed: 1,
+          free_text:
+            "Customer was not at home for smartphone delivery. Rider already completed 1 attempt.",
+        },
+        may_vs_aug: {
+          incident_date: "2026-05-20",
+          issue_type: "customer_unavailable",
+          product_type: "apparel",
+          parcel_value: 1800,
+          attempts_completed: 2,
+          free_text:
+            "Consignee unavailable at doorstep after 2 previous attempts in May 2026.",
+        },
+        cod_limit: {
+          incident_date: "2026-07-20",
+          issue_type: "cod_payment",
+          product_type: "general",
+          parcel_value: 7500,
+          free_text:
+            "Customer wants to pay INR 7,500 COD order completely in cash notes.",
+        },
+        missing_info: {
+          incident_date: "2026-08-10",
+          issue_type: "customer_unavailable",
+          product_type: "electronics",
+          attempts_completed: 1,
+          free_text:
+            "Customer unavailable for electronics parcel, 1 attempt completed.",
+        },
+        abstain: {
+          incident_date: "2026-08-10",
+          free_text:
+            "What is the monthly fuel reimbursement rate for electric bikes?",
+        },
+      };
+
+      function resetFormFields() {
+        [
+          "issue_type",
+          "product_type",
+          "parcel_value",
+          "attempts_completed",
+          "distance_km",
+          "seal_intact",
+          "supervisor_approved",
+          "otp_verified",
+          "otp_shared",
+          "free_text",
+        ].forEach((id) => {
+          document.getElementById(id).value = "";
+        });
+      }
+
+      function loadPreset(key) {
+        resetFormFields();
+        const data = PRESETS[key];
+        Object.entries(data).forEach(([k, v]) => {
+          const el = document.getElementById(k);
+          if (el) el.value = String(v);
+        });
+      }
+
+      function switchTab(tabName, btn) {
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        ["evaluator", "policies", "audit"].forEach((t) => {
+          document
+            .getElementById("tab-" + t)
+            .classList.toggle("hidden", t !== tabName);
+        });
+        if (tabName === "policies") loadPolicies();
+        if (tabName === "audit") loadAuditLog();
+      }
+
+      function parseBool(val) {
+        if (val === "true") return true;
+        if (val === "false") return false;
+        return null;
+      }
+
+      async function submitEvaluation(e) {
+        e.preventDefault();
+        const btn = document.getElementById("submit-btn");
+        btn.disabled = true;
+        btn.textContent = "Evaluating...";
+
+        const payload = {
+          incident_date: document.getElementById("incident_date").value,
+          free_text: document.getElementById("free_text").value,
+          issue_type: document.getElementById("issue_type").value || null,
+          product_type: document.getElementById("product_type").value || null,
+          parcel_value: document.getElementById("parcel_value").value
+            ? Number(document.getElementById("parcel_value").value)
+            : null,
+          attempts_completed: document.getElementById("attempts_completed")
+            .value
+            ? Number(document.getElementById("attempts_completed").value)
+            : null,
+          distance_km: document.getElementById("distance_km").value
+            ? Number(document.getElementById("distance_km").value)
+            : null,
+          seal_intact: parseBool(document.getElementById("seal_intact").value),
+          supervisor_approved: parseBool(
+            document.getElementById("supervisor_approved").value,
+          ),
+          otp_verified: parseBool(
+            document.getElementById("otp_verified").value,
+          ),
+          otp_shared: parseBool(document.getElementById("otp_shared").value),
+        };
+
+        try {
+          const resp = await fetch("/api/evaluate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const data = await resp.json();
+          renderResult(data);
+        } catch (err) {
+          alert("Request failed: " + err);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Evaluate Compliance Decision";
+        }
+      }
+
+      function renderClauseCard(c) {
+        return `
+        <div class="clause-card">
+          <div class="clause-header">
+            <span>${c.rule_clause_id} — ${c.sop_title} (v${c.version_num})</span>
+            <span>${c.scope} | Priority ${c.priority}</span>
+          </div>
+          <div class="clause-validity">
+            Valid: ${c.valid_from} to ${c.valid_to}
+          </div>
+          <div>${c.content}</div>
+        </div>
+      `;
+      }
+
+      function renderResult(data) {
+        document.getElementById("result-placeholder").classList.add("hidden");
+        document.getElementById("result-box").classList.remove("hidden");
+
+        document.getElementById("res-code").textContent = data.decision_code;
+        document.getElementById("res-status").textContent = data.status;
+        document.getElementById("res-latency").textContent =
+          `Latency: ${data.latency_ms} ms`;
+        document.getElementById("res-explanation").textContent =
+          data.explanation;
+
+        const missingBlock = document.getElementById("missing-block");
+        if (data.missing_fields && data.missing_fields.length > 0) {
+          missingBlock.classList.remove("hidden");
+          document.getElementById("res-missing").textContent =
+            data.missing_fields.join(", ");
+        } else {
+          missingBlock.classList.add("hidden");
+        }
+
+        const winnerBlock = document.getElementById("winner-block");
+        if (data.winning_clause) {
+          winnerBlock.classList.remove("hidden");
+          document.getElementById("res-winner").innerHTML = renderClauseCard(
+            data.winning_clause,
+          );
+        } else {
+          winnerBlock.classList.add("hidden");
+        }
+
+        const overrideBlock = document.getElementById("override-block");
+        if (data.overridden_clauses && data.overridden_clauses.length > 0) {
+          overrideBlock.classList.remove("hidden");
+          document.getElementById("res-overridden").innerHTML =
+            data.overridden_clauses.map(renderClauseCard).join("");
+        } else {
+          overrideBlock.classList.add("hidden");
+        }
+      }
+
+      async function loadPolicies() {
+        const tbody = document.getElementById("policies-tbody");
+        const resp = await fetch("/api/policies");
+        const rows = await resp.json();
+        tbody.innerHTML = rows
+          .map(
+            (r) => `
+        <tr>
+          <td class="mono"><strong>${r.rule_clause_id}</strong><br/>v${r.version_num}</td>
+          <td>${r.sop_title}<br/><span class="policy-category">${r.category}</span></td>
+          <td class="mono">${r.scope}<br/>Priority: ${r.priority}</td>
+          <td class="mono">${r.valid_from}<br/>to ${r.valid_to}</td>
+          <td class="mono">${JSON.stringify(r.conditions)}</td>
+          <td>${r.content}</td>
+        </tr>
+      `,
+          )
+          .join("");
+      }
+
+      async function loadAuditLog() {
+        const tbody = document.getElementById("audit-tbody");
+        const resp = await fetch("/api/tickets");
+        const rows = await resp.json();
+        tbody.innerHTML = rows
+          .map(
+            (r) => `
+        <tr>
+          <td class="mono">#${r.id}</td>
+          <td class="mono">${r.ticket_date}</td>
+          <td>${r.query_text}</td>
+          <td class="mono"><strong>${r.decision_json.status}</strong><br/>${r.decision_json.decision_code}</td>
+          <td class="mono">${r.latency_ms} ms</td>
+        </tr>
+      `,
+          )
+          .join("");
+      }
+    </script>
+  </body>
+</html>

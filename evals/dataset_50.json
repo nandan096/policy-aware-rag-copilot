@@ -1,0 +1,643 @@
+[
+  {
+    "id": "TC-01",
+    "category": "temporal",
+    "incident_date": "2026-05-10",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "apparel",
+      "parcel_value": 1200,
+      "attempts_completed": 2
+    },
+    "free_text": "Customer not at home after 2 attempts in May",
+    "expected_status": "DECIDED",
+    "expected_decision": "MARK_RTO",
+    "expected_clause": "SOP-DEL-001-C1-V1"
+  },
+  {
+    "id": "TC-02",
+    "category": "temporal",
+    "incident_date": "2026-05-31",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "general",
+      "parcel_value": 800,
+      "attempts_completed": 1
+    },
+    "free_text": "Consignee unavailable on last day of May policy",
+    "expected_status": "DECIDED",
+    "expected_decision": "REATTEMPT_DELIVERY",
+    "expected_clause": "SOP-DEL-001-C1-V1"
+  },
+  {
+    "id": "TC-03",
+    "category": "temporal",
+    "incident_date": "2026-06-01",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "apparel",
+      "parcel_value": 1200,
+      "attempts_completed": 2
+    },
+    "free_text": "Customer unavailable after 2 attempts on June 1",
+    "expected_status": "DECIDED",
+    "expected_decision": "REATTEMPT_DELIVERY",
+    "expected_clause": "SOP-DEL-001-C1-V2"
+  },
+  {
+    "id": "TC-04",
+    "category": "temporal",
+    "incident_date": "2026-08-15",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "general",
+      "parcel_value": 2500,
+      "attempts_completed": 3
+    },
+    "free_text": "3 delivery attempts already done in August",
+    "expected_status": "DECIDED",
+    "expected_decision": "MARK_RTO",
+    "expected_clause": "SOP-DEL-001-C1-V2"
+  },
+  {
+    "id": "TC-05",
+    "category": "temporal",
+    "incident_date": "2026-04-12",
+    "facts": {
+      "issue_type": "cod_payment",
+      "product_type": "general",
+      "parcel_value": 8500
+    },
+    "free_text": "Customer paying INR 8500 cash on delivery in April",
+    "expected_status": "DECIDED",
+    "expected_decision": "ACCEPT_CASH_OR_UPI",
+    "expected_clause": "SOP-COD-003-C1-V1"
+  },
+  {
+    "id": "TC-06",
+    "category": "temporal",
+    "incident_date": "2026-07-14",
+    "facts": {
+      "issue_type": "cod_payment",
+      "product_type": "general",
+      "parcel_value": 9500
+    },
+    "free_text": "COD cash collection of 9500 on July 14",
+    "expected_status": "DECIDED",
+    "expected_decision": "ACCEPT_CASH_OR_UPI",
+    "expected_clause": "SOP-COD-003-C1-V1"
+  },
+  {
+    "id": "TC-07",
+    "category": "temporal",
+    "incident_date": "2026-07-15",
+    "facts": {
+      "issue_type": "cod_payment",
+      "product_type": "general",
+      "parcel_value": 9500
+    },
+    "free_text": "COD cash collection of 9500 on July 15",
+    "expected_status": "DECIDED",
+    "expected_decision": "REQUIRE_DYNAMIC_UPI_QR_ONLY",
+    "expected_clause": "SOP-COD-003-C1-V2"
+  },
+  {
+    "id": "TC-08",
+    "category": "temporal",
+    "incident_date": "2026-09-02",
+    "facts": {
+      "issue_type": "cod_payment",
+      "product_type": "apparel",
+      "parcel_value": 6000
+    },
+    "free_text": "Customer wants to give cash for INR 6000 COD order",
+    "expected_status": "DECIDED",
+    "expected_decision": "REQUIRE_DYNAMIC_UPI_QR_ONLY",
+    "expected_clause": "SOP-COD-003-C1-V2"
+  },
+  {
+    "id": "TC-09",
+    "category": "temporal",
+    "incident_date": "2026-08-20",
+    "facts": {
+      "issue_type": "cod_payment",
+      "product_type": "general",
+      "parcel_value": 4500
+    },
+    "free_text": "COD order worth 4500 in cash",
+    "expected_status": "DECIDED",
+    "expected_decision": "ACCEPT_CASH_OR_UPI",
+    "expected_clause": "SOP-COD-003-C1-V2"
+  },
+  {
+    "id": "TC-10",
+    "category": "temporal",
+    "incident_date": "2026-03-10",
+    "facts": {
+      "issue_type": "cod_payment",
+      "product_type": "electronics",
+      "parcel_value": 12000
+    },
+    "free_text": "COD cash payment of 12000 in March",
+    "expected_status": "DECIDED",
+    "expected_decision": "REQUIRE_UPI_QR_ONLY",
+    "expected_clause": "SOP-COD-003-C1-V1"
+  },
+  {
+    "id": "TC-11",
+    "category": "temporal",
+    "incident_date": "2026-02-15",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "general",
+      "parcel_value": 500,
+      "attempts_completed": 2
+    },
+    "free_text": "Door locked on 2nd attempt in Feb",
+    "expected_status": "DECIDED",
+    "expected_decision": "MARK_RTO",
+    "expected_clause": "SOP-DEL-001-C1-V1"
+  },
+  {
+    "id": "TC-12",
+    "category": "temporal",
+    "incident_date": "2026-10-05",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "general",
+      "parcel_value": 500,
+      "attempts_completed": 2
+    },
+    "free_text": "Door locked on 2nd attempt in Oct",
+    "expected_status": "DECIDED",
+    "expected_decision": "REATTEMPT_DELIVERY",
+    "expected_clause": "SOP-DEL-001-C1-V2"
+  },
+
+  {
+    "id": "TC-13",
+    "category": "override",
+    "incident_date": "2026-08-10",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "electronics",
+      "parcel_value": 20000,
+      "attempts_completed": 1
+    },
+    "free_text": "Customer unavailable for smartphone delivery after 1 attempt",
+    "expected_status": "DECIDED",
+    "expected_decision": "HOLD_AT_SECURE_CAGE_AND_RTO",
+    "expected_clause": "SOP-VIP-002-C1"
+  },
+  {
+    "id": "TC-14",
+    "category": "override",
+    "incident_date": "2026-08-10",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "electronics",
+      "parcel_value": 45000,
+      "attempts_completed": 0
+    },
+    "free_text": "First failed delivery for expensive laptop",
+    "expected_status": "DECIDED",
+    "expected_decision": "REATTEMPT_DELIVERY",
+    "expected_clause": "SOP-VIP-002-C1"
+  },
+  {
+    "id": "TC-15",
+    "category": "override",
+    "incident_date": "2026-05-20",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "electronics",
+      "parcel_value": 18000,
+      "attempts_completed": 1
+    },
+    "free_text": "High value phone delivery failed once in May",
+    "expected_status": "DECIDED",
+    "expected_decision": "HOLD_AT_SECURE_CAGE_AND_RTO",
+    "expected_clause": "SOP-VIP-002-C1"
+  },
+  {
+    "id": "TC-16",
+    "category": "override",
+    "incident_date": "2026-08-10",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "electronics",
+      "parcel_value": 15000,
+      "attempts_completed": 1
+    },
+    "free_text": "Electronics worth exact threshold 15000, 1 attempt done",
+    "expected_status": "DECIDED",
+    "expected_decision": "HOLD_AT_SECURE_CAGE_AND_RTO",
+    "expected_clause": "SOP-VIP-002-C1"
+  },
+  {
+    "id": "TC-17",
+    "category": "override",
+    "incident_date": "2026-08-10",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "electronics",
+      "parcel_value": 8000,
+      "attempts_completed": 1
+    },
+    "free_text": "Budget earphones worth 8000, customer unavailable",
+    "expected_status": "DECIDED",
+    "expected_decision": "REATTEMPT_DELIVERY",
+    "expected_clause": "SOP-DEL-001-C1-V2"
+  },
+  {
+    "id": "TC-18",
+    "category": "override",
+    "incident_date": "2026-08-10",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "apparel",
+      "parcel_value": 25000,
+      "attempts_completed": 1
+    },
+    "free_text": "Designer jacket worth 25000, customer not at home",
+    "expected_status": "DECIDED",
+    "expected_decision": "REATTEMPT_DELIVERY",
+    "expected_clause": "SOP-DEL-001-C1-V2"
+  },
+  {
+    "id": "TC-19",
+    "category": "override",
+    "incident_date": "2026-06-15",
+    "facts": {
+      "issue_type": "damaged_parcel",
+      "seal_intact": true,
+      "supervisor_approved": true
+    },
+    "free_text": "Outer carton dented but inner product seal intact, supervisor approved inspection",
+    "expected_status": "DECIDED",
+    "expected_decision": "AUTHORIZE_DOORSTEP_OPEN_BOX_INSPECTION",
+    "expected_clause": "SOP-HUB-005-C1"
+  },
+  {
+    "id": "TC-20",
+    "category": "override",
+    "incident_date": "2026-06-15",
+    "facts": {
+      "issue_type": "damaged_parcel",
+      "seal_intact": false,
+      "supervisor_approved": true
+    },
+    "free_text": "Outer tape torn and inner seal broken",
+    "expected_status": "DECIDED",
+    "expected_decision": "DO_NOT_HANDOVER_PHOTO_AND_HUB_QC",
+    "expected_clause": "SOP-DMG-004-C1"
+  },
+  {
+    "id": "TC-21",
+    "category": "override",
+    "incident_date": "2026-06-15",
+    "facts": {
+      "issue_type": "damaged_parcel",
+      "seal_intact": false,
+      "supervisor_approved": false
+    },
+    "free_text": "Box crushed and security tape broken before handover",
+    "expected_status": "DECIDED",
+    "expected_decision": "DO_NOT_HANDOVER_PHOTO_AND_HUB_QC",
+    "expected_clause": "SOP-DMG-004-C1"
+  },
+  {
+    "id": "TC-22",
+    "category": "override",
+    "incident_date": "2026-09-12",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "electronics",
+      "parcel_value": 60000,
+      "attempts_completed": 2
+    },
+    "free_text": "Gaming laptop delivery failed twice",
+    "expected_status": "DECIDED",
+    "expected_decision": "HOLD_AT_SECURE_CAGE_AND_RTO",
+    "expected_clause": "SOP-VIP-002-C1"
+  },
+
+  {
+    "id": "TC-23",
+    "category": "standard",
+    "incident_date": "2026-07-01",
+    "facts": {
+      "issue_type": "open_box_delivery",
+      "product_type": "electronics",
+      "otp_shared": false
+    },
+    "free_text": "Customer wants to inspect laptop before sharing OTP",
+    "expected_status": "DECIDED",
+    "expected_decision": "INSPECT_BEFORE_OTP",
+    "expected_clause": "SOP-DMG-004-C2"
+  },
+  {
+    "id": "TC-24",
+    "category": "standard",
+    "incident_date": "2026-07-01",
+    "facts": {
+      "issue_type": "open_box_delivery",
+      "product_type": "electronics",
+      "otp_shared": true
+    },
+    "free_text": "Customer already shared 4-digit OTP and now asks rider to take phone back",
+    "expected_status": "DECIDED",
+    "expected_decision": "REJECT_DOORSTEP_RETURN",
+    "expected_clause": "SOP-DMG-004-C2"
+  },
+  {
+    "id": "TC-25",
+    "category": "standard",
+    "incident_date": "2026-07-10",
+    "facts": { "issue_type": "address_change", "distance_km": 1.2 },
+    "free_text": "Customer requested delivery to office 1.2 km away in same pin code",
+    "expected_status": "DECIDED",
+    "expected_decision": "DELIVER_WITH_GPS_CAPTURE",
+    "expected_clause": "SOP-ADR-006-C1"
+  },
+  {
+    "id": "TC-26",
+    "category": "standard",
+    "incident_date": "2026-07-10",
+    "facts": { "issue_type": "address_change", "distance_km": 2.0 },
+    "free_text": "New address is exactly 2 km from original pin code",
+    "expected_status": "DECIDED",
+    "expected_decision": "DELIVER_WITH_GPS_CAPTURE",
+    "expected_clause": "SOP-ADR-006-C1"
+  },
+  {
+    "id": "TC-27",
+    "category": "standard",
+    "incident_date": "2026-07-10",
+    "facts": { "issue_type": "address_change", "distance_km": 4.5 },
+    "free_text": "Customer moved 4.5 km away into another hub zone",
+    "expected_status": "DECIDED",
+    "expected_decision": "MARK_ADDRESS_MISROUTE_HUB_TRANSFER",
+    "expected_clause": "SOP-ADR-006-C1"
+  },
+  {
+    "id": "TC-28",
+    "category": "standard",
+    "incident_date": "2026-06-20",
+    "facts": { "issue_type": "reschedule_request", "otp_verified": true },
+    "free_text": "Customer rescheduled tomorrow slot with OTP verified in rider app",
+    "expected_status": "DECIDED",
+    "expected_decision": "CONFIRM_RESCHEDULE_SLOT",
+    "expected_clause": "SOP-DEL-001-C2"
+  },
+  {
+    "id": "TC-29",
+    "category": "standard",
+    "incident_date": "2026-06-20",
+    "facts": { "issue_type": "reschedule_request", "otp_verified": false },
+    "free_text": "Customer asked over phone call to come tomorrow without OTP",
+    "expected_status": "DECIDED",
+    "expected_decision": "REJECT_VERBAL_RESCHEDULE",
+    "expected_clause": "SOP-DEL-001-C2"
+  },
+  {
+    "id": "TC-30",
+    "category": "standard",
+    "incident_date": "2026-08-05",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "general",
+      "parcel_value": 999,
+      "attempts_completed": 0
+    },
+    "free_text": "First attempt customer phone unreachable",
+    "expected_status": "DECIDED",
+    "expected_decision": "REATTEMPT_DELIVERY",
+    "expected_clause": "SOP-DEL-001-C1-V2"
+  },
+  {
+    "id": "TC-31",
+    "category": "standard",
+    "incident_date": "2026-04-05",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "general",
+      "parcel_value": 999,
+      "attempts_completed": 0
+    },
+    "free_text": "First attempt customer phone unreachable in April",
+    "expected_status": "DECIDED",
+    "expected_decision": "REATTEMPT_DELIVERY",
+    "expected_clause": "SOP-DEL-001-C1-V1"
+  },
+  {
+    "id": "TC-32",
+    "category": "standard",
+    "incident_date": "2026-08-18",
+    "facts": {
+      "issue_type": "cod_payment",
+      "product_type": "electronics",
+      "parcel_value": 14000
+    },
+    "free_text": "COD smartphone worth 14000, customer wants to pay cash",
+    "expected_status": "DECIDED",
+    "expected_decision": "REQUIRE_DYNAMIC_UPI_QR_ONLY",
+    "expected_clause": "SOP-COD-003-C1-V2"
+  },
+  {
+    "id": "TC-33",
+    "category": "standard",
+    "incident_date": "2026-02-20",
+    "facts": { "issue_type": "address_change", "distance_km": 0.8 },
+    "free_text": "Alternate gate 800 meters away",
+    "expected_status": "DECIDED",
+    "expected_decision": "DELIVER_WITH_GPS_CAPTURE",
+    "expected_clause": "SOP-ADR-006-C1"
+  },
+  {
+    "id": "TC-34",
+    "category": "standard",
+    "incident_date": "2026-09-25",
+    "facts": { "issue_type": "address_change", "distance_km": 7.0 },
+    "free_text": "Customer shifted to different neighborhood 7 km away",
+    "expected_status": "DECIDED",
+    "expected_decision": "MARK_ADDRESS_MISROUTE_HUB_TRANSFER",
+    "expected_clause": "SOP-ADR-006-C1"
+  },
+
+  {
+    "id": "TC-35",
+    "category": "clarification",
+    "incident_date": "2026-08-10",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "electronics",
+      "attempts_completed": 1
+    },
+    "free_text": "Customer unavailable for electronics parcel, 1 attempt done",
+    "expected_status": "NEEDS_CLARIFICATION",
+    "expected_decision": "CLARIFICATION_REQUIRED",
+    "expected_clause": null
+  },
+  {
+    "id": "TC-36",
+    "category": "clarification",
+    "incident_date": "2026-08-10",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "apparel"
+    },
+    "free_text": "Customer not home for apparel delivery",
+    "expected_status": "NEEDS_CLARIFICATION",
+    "expected_decision": "CLARIFICATION_REQUIRED",
+    "expected_clause": null
+  },
+  {
+    "id": "TC-37",
+    "category": "clarification",
+    "incident_date": "2026-08-10",
+    "facts": { "issue_type": "cod_payment" },
+    "free_text": "Customer wants to pay cash for COD parcel",
+    "expected_status": "NEEDS_CLARIFICATION",
+    "expected_decision": "CLARIFICATION_REQUIRED",
+    "expected_clause": null
+  },
+  {
+    "id": "TC-38",
+    "category": "clarification",
+    "incident_date": "2026-08-10",
+    "facts": { "issue_type": "address_change" },
+    "free_text": "Customer gave a new delivery address",
+    "expected_status": "NEEDS_CLARIFICATION",
+    "expected_decision": "CLARIFICATION_REQUIRED",
+    "expected_clause": null
+  },
+  {
+    "id": "TC-39",
+    "category": "clarification",
+    "incident_date": "2026-08-10",
+    "facts": { "issue_type": "damaged_parcel" },
+    "free_text": "Outer box looks slightly dented at doorstep",
+    "expected_status": "NEEDS_CLARIFICATION",
+    "expected_decision": "CLARIFICATION_REQUIRED",
+    "expected_clause": null
+  },
+  {
+    "id": "TC-40",
+    "category": "clarification",
+    "incident_date": "2026-08-10",
+    "facts": { "issue_type": "reschedule_request" },
+    "free_text": "Customer asking to reschedule delivery slot",
+    "expected_status": "NEEDS_CLARIFICATION",
+    "expected_decision": "CLARIFICATION_REQUIRED",
+    "expected_clause": null
+  },
+  {
+    "id": "TC-41",
+    "category": "clarification",
+    "incident_date": "2026-08-10",
+    "facts": {
+      "issue_type": "open_box_delivery",
+      "product_type": "electronics"
+    },
+    "free_text": "Customer wants open box check for smartphone",
+    "expected_status": "NEEDS_CLARIFICATION",
+    "expected_decision": "CLARIFICATION_REQUIRED",
+    "expected_clause": null
+  },
+  {
+    "id": "TC-42",
+    "category": "clarification",
+    "incident_date": "2026-05-15",
+    "facts": {
+      "issue_type": "customer_unavailable",
+      "product_type": "electronics",
+      "parcel_value": 22000
+    },
+    "free_text": "High value phone customer unavailable, attempts unknown",
+    "expected_status": "NEEDS_CLARIFICATION",
+    "expected_decision": "CLARIFICATION_REQUIRED",
+    "expected_clause": null
+  },
+
+  {
+    "id": "TC-43",
+    "category": "abstention",
+    "incident_date": "2026-08-10",
+    "facts": {},
+    "free_text": "What is the monthly fuel reimbursement rate for electric bikes?",
+    "expected_status": "ABSTAIN",
+    "expected_decision": "ABSTAIN_OUT_OF_SCOPE",
+    "expected_clause": null
+  },
+  {
+    "id": "TC-44",
+    "category": "abstention",
+    "incident_date": "2026-08-10",
+    "facts": {},
+    "free_text": "How many paid sick leaves do warehouse sorters get per year?",
+    "expected_status": "ABSTAIN",
+    "expected_decision": "ABSTAIN_OUT_OF_SCOPE",
+    "expected_clause": null
+  },
+  {
+    "id": "TC-45",
+    "category": "abstention",
+    "incident_date": "2026-08-10",
+    "facts": {},
+    "free_text": "What is the DGCA altitude limit for commercial drone parcel drops?",
+    "expected_status": "ABSTAIN",
+    "expected_decision": "ABSTAIN_OUT_OF_SCOPE",
+    "expected_clause": null
+  },
+  {
+    "id": "TC-46",
+    "category": "abstention",
+    "incident_date": "2026-08-10",
+    "facts": {},
+    "free_text": "Can riders claim overtime pay during Diwali night shifts?",
+    "expected_status": "ABSTAIN",
+    "expected_decision": "ABSTAIN_OUT_OF_SCOPE",
+    "expected_clause": null
+  },
+  {
+    "id": "TC-47",
+    "category": "abstention",
+    "incident_date": "2026-08-10",
+    "facts": {},
+    "free_text": "What temperature should frozen vaccines be stored at in cold trucks?",
+    "expected_status": "ABSTAIN",
+    "expected_decision": "ABSTAIN_OUT_OF_SCOPE",
+    "expected_clause": null
+  },
+  {
+    "id": "TC-48",
+    "category": "abstention",
+    "incident_date": "2026-08-10",
+    "facts": {},
+    "free_text": "How do I reset my corporate Slack password?",
+    "expected_status": "ABSTAIN",
+    "expected_decision": "ABSTAIN_OUT_OF_SCOPE",
+    "expected_clause": null
+  },
+  {
+    "id": "TC-49",
+    "category": "abstention",
+    "incident_date": "2026-08-10",
+    "facts": {},
+    "free_text": "What is the penalty for losing a company-issued raincoat?",
+    "expected_status": "ABSTAIN",
+    "expected_decision": "ABSTAIN_OUT_OF_SCOPE",
+    "expected_clause": null
+  },
+  {
+    "id": "TC-50",
+    "category": "abstention",
+    "incident_date": "2026-08-10",
+    "facts": {},
+    "free_text": "Which vendor supplies barcode scanners to the Bengaluru hub?",
+    "expected_status": "ABSTAIN",
+    "expected_decision": "ABSTAIN_OUT_OF_SCOPE",
+    "expected_clause": null
+  }
+]
