@@ -2,17 +2,13 @@
 
 A decision-support API and web console for evaluating last-mile delivery incidents against versioned logistics policies. It combines date-aware hybrid retrieval with a deterministic Python rules engine, so an LLM explains a locked decision but never chooses the compliance action.
 
-> **Scope:** This project is a technical demo, not legal advice or a replacement for an organization’s approved operating procedures.
-
-# Policy-Aware RAG Copilot for Last-Mile Logistics
-
-A decision-support API and web console for evaluating last-mile delivery incidents against versioned logistics policies. It combines date-aware hybrid retrieval with a deterministic Python rules engine, so an LLM explains a locked decision but never chooses the compliance action.
-
 * **Live Web Console:** <https://policy-aware-rag-copilot.onrender.com/>
 * **Interactive API Docs (Swagger):** <https://policy-aware-rag-copilot.onrender.com/docs>
 * **Health Check:** <https://policy-aware-rag-copilot.onrender.com/api/health>
 
 > **Note:** Hosted on Render’s free tier—initial requests after an idle period may take ~50 seconds for the container to spin up.
+
+> **Scope:** This project is a technical demo, not legal advice or a replacement for an organization’s approved operating procedures.
 
 ## Why policy-aware retrieval?
 
