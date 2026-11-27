@@ -2,9 +2,9 @@
 
 A decision-support API and web console for evaluating last-mile delivery incidents against versioned logistics policies. It combines date-aware hybrid retrieval with a deterministic Python rules engine, so an LLM explains a locked decision but never chooses the compliance action.
 
-* **Live Web Console:** <https://policy-aware-rag-copilot.onrender.com/>
-* **Interactive API Docs (Swagger):** <https://policy-aware-rag-copilot.onrender.com/docs>
-* **Health Check:** <https://policy-aware-rag-copilot.onrender.com/api/health>
+- **Live Web Console:** <https://policy-aware-rag-copilot.onrender.com/>
+- **Interactive API Docs (Swagger):** <https://policy-aware-rag-copilot.onrender.com/docs>
+- **Health Check:** <https://policy-aware-rag-copilot.onrender.com/api/health>
 
 > **Note:** Hosted on Render’s free tier—initial requests after an idle period may take ~50 seconds for the container to spin up.
 
@@ -79,7 +79,7 @@ app/
 data/
   sops/policies.json  Sample versioned policy clauses
 evals/
-  dataset_50.json     60 evaluation cases across 5 categories
+  dataset_60.json     60 evaluation cases across 5 categories
   run_benchmark.py    Benchmark harness
   benchmark_results.json
 sql/
@@ -231,6 +231,13 @@ The response includes the status and authoritative `decision_code`, explanation,
 | `ANSWERING_PROVIDER` | No                              | Explanation provider: `gemini` (default) or `groq`                       |
 | `ANSWERING_MODEL`    | No                              | Explanation model; defaults to `gemini-3.5-flash-lite`                   |
 | `EMBEDDING_MODEL`    | No                              | Embedding model; defaults to `gemini-embedding-001`                      |
+
+## Limitations
+
+- **Synthetic policy corpus:** Sample policies in `data/sops/policies.json` are synthetic last-mile logistics SOPs created for demonstration, not proprietary corporate policies.
+- **Tuned similarity thresholds:** Abstention thresholds (`0.62` general similarity floor and `0.76` zero-fact query floor) were calibrated against the 60-case evaluation set and may require re-tuning for larger or domain-shifted policy corpora.
+- **Benchmark latency scope:** Reported benchmark latency (`2,203 ms avg; 2,601 ms P95`) covers embedding generation, hybrid PostgreSQL retrieval, and deterministic rule evaluation; end-to-end `/api/evaluate` requests add LLM explanation generation and audit logging time.
+- **Public demo endpoints:** `/api/evaluate` and `/api/tickets` are publicly accessible and rate-limited on the hosted demo—do not submit sensitive, personal, or proprietary operational data.
 
 ## Development notes
 

@@ -1,8 +1,10 @@
 import logging
+import time
+from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 from datetime import date
 from typing import Any
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -11,6 +13,27 @@ from app.db import init_pool, close_pool, get_db_cursor
 from app.copilot import evaluate_incident
 
 logger = logging.getLogger(__name__)
+
+# Simple in-memory per-IP sliding-window rate limiter (protects Gemini quota & audit logs)
+_rate_buckets: dict[str, deque[float]] = defaultdict(deque)
+
+
+def _enforce_rate_limit(request: Request, bucket_name: str, max_requests: int, window_seconds: int = 60) -> None:
+    forwarded = request.headers.get("x-forwarded-for")
+    client_ip = forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else "unknown")
+    key = f"{bucket_name}:{client_ip}"
+    now = time.monotonic()
+    q = _rate_buckets[key]
+
+    while q and now - q[0] > window_seconds:
+        q.popleft()
+
+    if len(q) >= max_requests:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Rate limit exceeded ({max_requests} requests per {window_seconds}s). Please try again shortly.",
+        )
+    q.append(now)
 
 
 @asynccontextmanager
@@ -64,7 +87,8 @@ def health_check() -> dict[str, str]:
 
 
 @app.post("/api/evaluate")
-def evaluate_ticket(req: IncidentRequest) -> dict[str, Any]:
+def evaluate_ticket(req: IncidentRequest, request: Request) -> dict[str, Any]:
+    _enforce_rate_limit(request, bucket_name="evaluate", max_requests=20, window_seconds=60)
     facts = req.model_dump(exclude={"incident_date", "free_text"}, exclude_none=True)
     try:
         return evaluate_incident(
@@ -112,7 +136,8 @@ def list_policies() -> list[dict[str, Any]]:
 
 
 @app.get("/api/tickets")
-def recent_tickets(limit: int = Query(default=15, ge=1, le=100)) -> list[dict[str, Any]]:
+def recent_tickets(request: Request, limit: int = Query(default=15, ge=1, le=50)) -> list[dict[str, Any]]:
+    _enforce_rate_limit(request, bucket_name="tickets", max_requests=60, window_seconds=60)
     with get_db_cursor() as cur:
         cur.execute(
             """
