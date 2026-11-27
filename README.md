@@ -74,6 +74,8 @@ evals/
   dataset_50.json     Evaluation cases
   run_benchmark.py   Benchmark harness
   benchmark_results.json
+sql/
+  schema.sql          PostgreSQL schema with pgvector & tsvector indexes
 static/
   index.html          Web console
   styles.css          Console styles
@@ -85,11 +87,9 @@ requirements.txt
 ### Prerequisites
 
 - Python 3.10 or later
-- A PostgreSQL database with `pgvector` enabled and the schema expected by the app (`sop_documents`, `rule_versions`, and `tickets`)
+- A PostgreSQL database with `pgvector` enabled (`sql/schema.sql` provisions `sop_documents`, `rule_versions`, and `tickets`)
 - A Gemini API key for embeddings. The default explanation provider also uses Gemini.
 - Optionally, a Groq API key if you choose Groq for explanations
-
-> **Database note:** The repository does not currently include a database migration or schema-creation script. Use a database where the required tables, vector column, and full-text search column/index are already provisioned before ingestion or startup.
 
 ### 1. Create and activate a virtual environment
 
@@ -116,9 +116,17 @@ EMBEDDING_MODEL=gemini-embedding-001
 
 `DATABASE_URL` is required. Gemini embeddings are used for both ingestion and retrieval, so `GEMINI_API_KEY` is required even if Groq is selected for explanations. To use Groq for explanations, set `ANSWERING_PROVIDER=groq` and provide `GROQ_API_KEY`.
 
-### 3. Ingest policies
+### 3. Initialize the database schema
 
-After confirming the database schema is available, ingest the sample policies:
+Run `sql/schema.sql` against your PostgreSQL / Neon database to enable `pgvector` and create the required tables and indexes (`sop_documents`, `rule_versions`, `tickets`):
+
+```powershell
+psql "$env:DATABASE_URL" -f sql/schema.sql
+```
+
+### 4. Ingest policies
+
+After initializing the database schema, ingest the sample policies:
 
 ```powershell
 python -m app.ingest
@@ -126,7 +134,7 @@ python -m app.ingest
 
 Ingestion preserves existing policy versions and skips clauses that have already been inserted.
 
-### 4. Start the API and web console
+### 5. Start the API and web console
 
 ```powershell
 python -m uvicorn app.main:app --reload
@@ -134,9 +142,9 @@ python -m uvicorn app.main:app --reload
 
 Open:
 
-- Web console: <http://127.0.0.1:8000/>
-- Interactive API documentation: <http://127.0.0.1:8000/docs>
-- Health check: <http://127.0.0.1:8000/api/health>
+- Web console: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+- Interactive API documentation: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- Health check: [http://127.0.0.1:8000/api/health](http://127.0.0.1:8000/api/health)
 
 The health endpoint checks database connectivity.
 
@@ -219,5 +227,6 @@ The response includes the status and decision code, explanation, cited clause ID
 ## Development notes
 
 - Policy data lives in `data/sops/policies.json`; add new policy versions rather than overwriting historical versions.
-- The ingestion script expects the database schema to exist and uses Gemini to create embeddings for newly inserted clauses.
+- Run `sql/schema.sql` before first-time ingestion; `python -m app.ingest` uses Gemini to generate 768-dimensional embeddings for newly inserted clauses.
 - The benchmark evaluates retrieval and deterministic decisions against the sample dataset. It uses the database and embedding provider but does not exercise the LLM explanation path.
+
