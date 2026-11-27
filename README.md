@@ -27,16 +27,18 @@ Policies can change over time, and specific exceptions can override general rule
 
 ## Evaluation snapshot
 
-The checked-in 50-case evaluation report records the following results:
+The 50-case evaluation results are summarized below:
 
-| Metric | Recorded result |
-| --- | ---: |
-| Policy-aware decision accuracy | 100% (50/50) |
-| Naive baseline decision accuracy | 90% |
-| Policy-aware retrieval Recall@5 | 100% (34/34) |
-| Policy-aware retrieval + decision latency | 2,048 ms average; 3,055 ms P95 |
+| Metric                                   | Naive RAG baseline |           Policy-Aware Copilot |
+| ---------------------------------------- | -----------------: | -----------------------------: |
+| Overall decision accuracy                |              90.0% |             **100.0% (50/50)** |
+| Temporal version accuracy                |              66.7% |             **100.0% (12/12)** |
+| Missing-info clarification accuracy      |              87.5% |               **100.0% (8/8)** |
+| Override, standard & abstention accuracy |             100.0% |             **100.0% (30/30)** |
+| Retrieval Recall@5                       |                  — |             **100.0% (34/34)** |
+| Retrieval + decision latency             |                  — | **2,048 ms avg; 3,055 ms P95** |
 
-The dataset covers temporal policy changes, override precedence, standard rules, missing-information clarification, and out-of-scope abstention. The naive baseline disables date filtering and neutralizes policy priorities. These figures are the snapshot in [`evals/benchmark_results.json`](evals/benchmark_results.json), not a performance guarantee. Latency depends on the database, network, and embedding API; the benchmark measures retrieval and deterministic evaluation, not the final LLM explanation or audit logging.
+The dataset covers temporal policy changes, override precedence, standard rules, missing-information clarification, and out-of-scope abstention. The naive baseline disables date filtering and neutralizes policy priorities. These results are an evaluation snapshot, not a performance guarantee; aggregate results are saved in [`evals/benchmark_results.json`](evals/benchmark_results.json). Latency depends on the database, network, and embedding API; the benchmark measures retrieval and deterministic evaluation, not the final LLM explanation or audit logging.
 
 Run the benchmark with:
 
@@ -66,7 +68,6 @@ app/
   llm_client.py       Gemini embeddings and Gemini/Groq JSON responses
   main.py             FastAPI routes and static file serving
   retrieval.py        Temporal hybrid retrieval and RRF ranking
-  schemas.py          Shared data schemas
 data/
   sops/policies.json  Sample versioned policy clauses
 evals/
@@ -147,34 +148,73 @@ Evaluate an incident. `incident_date` is required; the other structured fields a
 
 ```json
 {
-  "incident_date": "2026-06-15",
+  "incident_date": "2026-08-10",
   "free_text": "Customer was unavailable at the delivery location.",
   "issue_type": "customer_unavailable",
-  "product_type": "general",
+  "product_type": "electronics",
+  "parcel_value": 20000,
   "attempts_completed": 1
 }
 ```
 
-The response includes the status and decision code, explanation, cited clause IDs, missing fields, winning and overridden clause summaries, and measured latency. Possible statuses include `DECIDED`, `NEEDS_CLARIFICATION`, and `ABSTAIN`.
+Example response:
+
+```json
+{
+  "incident_date": "2026-08-10",
+  "status": "DECIDED",
+  "decision_code": "HOLD_AT_SECURE_CAGE_AND_RTO",
+  "explanation": "Hold the shipment at the secure hub cage and initiate immediate RTO because only 1 delivery reattempt is permitted for high-value electronics above INR 15,000.",
+  "cited_clause_ids": ["SOP-VIP-002-C1", "SOP-DEL-001-C1-V2"],
+  "missing_fields": [],
+  "winning_clause": {
+    "sop_code": "SOP-VIP-002",
+    "sop_title": "High-Value Electronics Client Override SOP",
+    "rule_clause_id": "SOP-VIP-002-C1",
+    "version_num": 1,
+    "scope": "OVERRIDE",
+    "priority": 100,
+    "valid_from": "2026-01-01",
+    "valid_to": "ACTIVE",
+    "content": "For high-value electronics shipments above INR 15,000, only 1 delivery reattempt is permitted due to theft risk. After the second failed attempt, hold at the secure hub cage and initiate immediate RTO."
+  },
+  "overridden_clauses": [
+    {
+      "sop_code": "SOP-DEL-001",
+      "sop_title": "Standard Last-Mile Reattempt & NDR Policy",
+      "rule_clause_id": "SOP-DEL-001-C1-V2",
+      "version_num": 2,
+      "scope": "GLOBAL",
+      "priority": 10,
+      "valid_from": "2026-06-01",
+      "valid_to": "ACTIVE",
+      "content": "When a customer is unavailable at the doorstep, the delivery executive must log an IVR call and wait 10 minutes. Maximum 3 delivery reattempts are allowed within 72 hours before marking the shipment RTO (Return to Origin)."
+    }
+  ],
+  "latency_ms": 2140
+}
+```
+
+The response includes the status and decision code, explanation, cited clause IDs, missing fields, winning and overridden clause summaries, and measured latency. Possible statuses include `DECIDED`, `NEEDS_CLARIFICATION`, and `ABSTAIN`. The explanation and latency above are illustrative; actual values can vary by run.
 
 ### Other endpoints
 
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| `GET` | `/api/health` | Check database connectivity |
-| `GET` | `/api/policies` | List policy clauses and their version metadata |
-| `GET` | `/api/tickets?limit=15` | Return recent audit entries; defaults to 15 |
+| Method | Endpoint                | Purpose                                        |
+| ------ | ----------------------- | ---------------------------------------------- |
+| `GET`  | `/api/health`           | Check database connectivity                    |
+| `GET`  | `/api/policies`         | List policy clauses and their version metadata |
+| `GET`  | `/api/tickets?limit=15` | Return recent audit entries; defaults to 15    |
 
 ## Configuration reference
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `DATABASE_URL` | Yes | PostgreSQL connection string |
-| `GEMINI_API_KEY` | Yes for ingestion and retrieval | Gemini embedding API; also used for explanations when Gemini is selected |
-| `GROQ_API_KEY` | Only when using Groq | Groq explanation API |
-| `ANSWERING_PROVIDER` | No | Explanation provider: `gemini` (default) or `groq` |
-| `ANSWERING_MODEL` | No | Explanation model; defaults to `gemini-3.5-flash-lite` |
-| `EMBEDDING_MODEL` | No | Embedding model; defaults to `gemini-embedding-001` |
+| Variable             | Required                        | Purpose                                                                  |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------ |
+| `DATABASE_URL`       | Yes                             | PostgreSQL connection string                                             |
+| `GEMINI_API_KEY`     | Yes for ingestion and retrieval | Gemini embedding API; also used for explanations when Gemini is selected |
+| `GROQ_API_KEY`       | Only when using Groq            | Groq explanation API                                                     |
+| `ANSWERING_PROVIDER` | No                              | Explanation provider: `gemini` (default) or `groq`                       |
+| `ANSWERING_MODEL`    | No                              | Explanation model; defaults to `gemini-3.5-flash-lite`                   |
+| `EMBEDDING_MODEL`    | No                              | Embedding model; defaults to `gemini-embedding-001`                      |
 
 ## Development notes
 
